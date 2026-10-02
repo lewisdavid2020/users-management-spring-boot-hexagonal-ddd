@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration(proxyBeanMethods = false)
 public class DataSourceSpringConfig {
 
+  private static final String PROP_DB_TYPE     = "${db.type:mysql}";
   private static final String PROP_DB_HOST     = "${db.host}";
   private static final String PROP_DB_PORT     = "${db.port}";
   private static final String PROP_DB_NAME     = "${db.name}";
@@ -20,7 +21,10 @@ public class DataSourceSpringConfig {
   private static final String PROP_DB_PASSWORD = "${db.password}";
   private static final String PROP_DB_SSL_MODE = "${db.ssl-mode}";
 
-  private static final String LOG_DATASOURCE_INIT = "[DataSourceSpringConfig] DataSource inicializado. host={} port={}";
+  private static final String LOG_DATASOURCE_INIT = "[DataSourceSpringConfig] DataSource inicializado. type={} host={} port={}";
+
+  @Value(PROP_DB_TYPE)
+  private String dbType;
 
   @Value(PROP_DB_HOST)
   private String dbHost;
@@ -43,7 +47,7 @@ public class DataSourceSpringConfig {
   @Bean
   public DataSource dataSource() {
     final DatabaseConfig config =
-        new DatabaseConfig(dbHost, dbPort, dbName, dbUsername, dbPassword, dbSslMode);
+        new DatabaseConfig(dbType, dbHost, dbPort, dbName, dbUsername, dbPassword, dbSslMode);
 
     final HikariConfig hikariConfig = new HikariConfig();
     hikariConfig.setJdbcUrl(config.buildJdbcUrl());
@@ -53,7 +57,7 @@ public class DataSourceSpringConfig {
     hikariConfig.setMinimumIdle(2);
     hikariConfig.setConnectionTimeout(30_000);
 
-    log.info(LOG_DATASOURCE_INIT, dbHost, dbPort);
+    log.info(LOG_DATASOURCE_INIT, dbType, dbHost, dbPort);
     return new HikariDataSource(hikariConfig);
   }
 }
